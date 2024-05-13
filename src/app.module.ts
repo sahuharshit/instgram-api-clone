@@ -1,6 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
+import { UsersModule } from './users/users.module';
 
 config();
 
@@ -17,7 +18,7 @@ const TYPE_ORM_IMPORT = TypeOrmModule.forRoot({
 });
 
 @Module({
-  imports: [TYPE_ORM_IMPORT],
+  imports: [TYPE_ORM_IMPORT, UsersModule],
   controllers: [],
   providers: [],
 })
