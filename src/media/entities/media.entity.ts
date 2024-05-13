@@ -10,6 +10,11 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
+export enum MediaType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+}
+
 @Entity()
 export class Media {
   @PrimaryGeneratedColumn()
@@ -25,8 +30,11 @@ export class Media {
   @Column()
   url: string;
 
-  @Column()
-  mediaType: string; // 'image' or 'video'
+  @Column({
+    type: 'enum',
+    enum: MediaType,
+  })
+  mediaType: MediaType;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

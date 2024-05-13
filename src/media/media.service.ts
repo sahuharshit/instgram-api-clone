@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Media } from './entities/media.entity';
+import { Media, MediaType } from './entities/media.entity';
 
 @Injectable()
 export class MediaService {
@@ -10,7 +10,11 @@ export class MediaService {
     private mediaRepository: Repository<Media>,
   ) {}
 
-  async create(postId: number, url: string, mediaType: string): Promise<Media> {
+  async create(
+    postId: number,
+    url: string,
+    mediaType: MediaType,
+  ): Promise<Media> {
     const newMedia = this.mediaRepository.create({
       postId,
       url,

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MediaType } from '../entities/media.entity';
 
 export class CreateMediaDto {
   @ApiProperty({
@@ -14,8 +15,8 @@ export class CreateMediaDto {
   url: string;
 
   @ApiProperty({
-    example: 'image',
+    example: MediaType.IMAGE,
     description: 'Type of media (image or video)',
   })
-  mediaType: string;
+  mediaType: MediaType;
 }
