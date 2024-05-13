@@ -1,3 +1,4 @@
+import { Media } from 'src/media/entities/media.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -20,6 +22,9 @@ export class Post {
   @ManyToOne(() => User, (user) => user.posts, { eager: false })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => Media, (media) => media.post)
+  media: Media[];
 
   @Column({ name: 'userId', nullable: true })
   userId: number;

@@ -1,34 +1,63 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 import { MediaService } from './media.service';
+import { Media } from './entities/media.entity';
 import { CreateMediaDto } from './dto/create-media.dto';
-import { UpdateMediaDto } from './dto/update-media.dto';
 
+@ApiTags('media')
 @Controller('media')
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Post()
-  create(@Body() createMediaDto: CreateMediaDto) {
-    return this.mediaService.create(createMediaDto);
+  @ApiOperation({ summary: 'Add media to a post' })
+  @ApiCreatedResponse({
+    description: 'Media has been successfully added.',
+    type: Media,
+  })
+  async addMedia(@Body() createMediaDto: CreateMediaDto): Promise<Media> {
+    return this.mediaService.create(
+      createMediaDto.postId,
+      createMediaDto.url,
+      createMediaDto.mediaType,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.mediaService.findAll();
+  @ApiOperation({ summary: 'Get all media for a specific post' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of media for the post',
+    type: [Media],
+  })
+  async getMediaByPost(@Query('postId') postId: number): Promise<Media[]> {
+    return this.mediaService.findAllByPost(postId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.mediaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMediaDto: UpdateMediaDto) {
-    return this.mediaService.update(+id, updateMediaDto);
+  @ApiOperation({ summary: 'Get a single media item by ID' })
+  @ApiResponse({ status: 200, description: 'The media item', type: Media })
+  async getMedia(@Param('id') id: number): Promise<Media> {
+    return this.mediaService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mediaService.remove(+id);
+  @ApiOperation({ summary: 'Delete a media item' })
+  @ApiResponse({ status: 200, description: 'Media has been deleted' })
+  async deleteMedia(@Param('id') id: number): Promise<void> {
+    return this.mediaService.remove(id);
   }
 }

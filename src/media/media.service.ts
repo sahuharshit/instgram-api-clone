@@ -1,26 +1,42 @@
-import { Injectable } from '@nestjs/common';
-import { CreateMediaDto } from './dto/create-media.dto';
-import { UpdateMediaDto } from './dto/update-media.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Media } from './entities/media.entity';
 
 @Injectable()
 export class MediaService {
-  create(createMediaDto: CreateMediaDto) {
-    return 'This action adds a new media';
+  constructor(
+    @InjectRepository(Media)
+    private mediaRepository: Repository<Media>,
+  ) {}
+
+  async create(postId: number, url: string, mediaType: string): Promise<Media> {
+    const newMedia = this.mediaRepository.create({
+      postId,
+      url,
+      mediaType,
+    });
+    return this.mediaRepository.save(newMedia);
   }
 
-  findAll() {
-    return `This action returns all media`;
+  async findAllByPost(postId: number): Promise<Media[]> {
+    return this.mediaRepository.find({
+      where: { postId: postId },
+    });
+  }
+  async findOne(id: number): Promise<Media> {
+    const media = await this.mediaRepository.findOne({ where: { id } });
+    if (!media) {
+      throw new NotFoundException(`Media with ID ${id} not found`);
+    }
+    return media;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} media`;
-  }
-
-  update(id: number, updateMediaDto: UpdateMediaDto) {
-    return `This action updates a #${id} media`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} media`;
+  async remove(id: number): Promise<void> {
+    const media = await this.findOne(id);
+    if (!media) {
+      throw new NotFoundException(`Media with ID ${id} not found`);
+    }
+    await this.mediaRepository.delete(id);
   }
 }
