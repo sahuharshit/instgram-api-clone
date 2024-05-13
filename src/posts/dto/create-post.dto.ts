@@ -8,9 +8,6 @@ export class CreatePostDto {
   })
   caption: string;
 
-  @ApiProperty({ example: 1, description: 'User ID of the post creator' })
-  userId: number;
-
   @ApiProperty({ type: [CreateMediaDto] })
   media: CreateMediaDto[];
 }
