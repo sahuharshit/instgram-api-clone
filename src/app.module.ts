@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
+import { MediaModule } from './media/media.module';
 
 config();
 
@@ -19,7 +20,7 @@ const TYPE_ORM_IMPORT = TypeOrmModule.forRoot({
 });
 
 @Module({
-  imports: [TYPE_ORM_IMPORT, UsersModule, PostsModule],
+  imports: [TYPE_ORM_IMPORT, UsersModule, PostsModule, MediaModule],
   controllers: [],
   providers: [],
 })
