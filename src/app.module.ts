@@ -1,6 +1,4 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 
@@ -20,8 +18,8 @@ const TYPE_ORM_IMPORT = TypeOrmModule.forRoot({
 
 @Module({
   imports: [TYPE_ORM_IMPORT],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements OnModuleInit {
   async onModuleInit() {
