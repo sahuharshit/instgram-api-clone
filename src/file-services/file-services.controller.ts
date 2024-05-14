@@ -12,6 +12,6 @@ export class FileServicesController {
 
   @Get('/')
   getSignedUrl(@Query('key') key?: string): Promise<string> {
-    return this.fileServicesService.getUserUploadsSignedUrl(key);
+    return this.fileServicesService.createPresignedUrl(key, 'image/jpeg');
   }
 }

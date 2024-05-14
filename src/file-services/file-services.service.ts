@@ -5,7 +5,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
-import { CreateFileServiceDto } from './dto/create-file-service.dto';
 import { AWSS3Bucket } from 'src/constant/constant';
 
 @Injectable()
@@ -14,56 +13,16 @@ export class FileServicesService {
 
   constructor(@Inject(AWSS3Bucket) private s3: S3) {}
 
-  async generatePresignedUrls(
-    createFileServiceDto: CreateFileServiceDto,
-  ): Promise<any[]> {
-    return Promise.all(
-      createFileServiceDto.files.map(async (file) => {
-        const subfolderPrefix = file.subfolder ? `${file.subfolder}` : '';
-        const fileName = `${subfolderPrefix}${file.fileName}`;
-        const tags = file.tags ? file.tags : {};
-        const tagsQueryString = this.constructTagsQueryString(tags);
-
-        try {
-          const url = await this.createPresignedUrl(
-            fileName,
-            file.contentType,
-            tagsQueryString,
-          );
-          return { fileName: file.fileName, url };
-        } catch (error) {
-          this.logger.error(
-            `Error generating URL for ${file.fileName}: ${error.message}`,
-          );
-          throw new BadRequestException(error.message);
-        }
-      }),
-    );
-  }
-
-  private constructTagsQueryString(tags?: Record<string, string>): string {
-    return tags
-      ? Object.entries(tags)
-          .map(
-            ([key, value]) =>
-              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
-          )
-          .join('&')
-      : '';
-  }
-
-  private async createPresignedUrl(
+  public async createPresignedUrl(
     fileName: string,
-    contentType: string,
-    tagsQueryString: string,
+    contentType: string
   ): Promise<string> {
     const params = {
-      Bucket: `user-uploads`,
+      Bucket: `${process.env.APP_NAME}-${process.env.ENVIRONMENT}-demo-app`,
       Key: fileName,
       Expires: 60 * 5, // Expires in 5 minutes
       ContentType: contentType,
       ACL: 'private',
-      Tagging: tagsQueryString,
     };
 
     return new Promise((resolve, reject) => {
@@ -76,80 +35,6 @@ export class FileServicesService {
       });
     });
   }
-
-  async getFileList(prefix = '') {
-    try {
-      const bucket = `${process.env.APP_NAME}-${process.env.ENVIRONMENT}-user-uploads`;
-      const response = await this.s3
-        .listObjectsV2({
-          Bucket: bucket,
-          Prefix: prefix,
-          Delimiter: '/',
-        })
-        .promise();
-
-      const root = { folders: [], files: [] };
-
-      // Folders
-      response.CommonPrefixes.forEach(({ Prefix }) => {
-        const folderName = Prefix.split('/').slice(-2, -1)[0]; // Get the last folder name before the trailing slash
-        root.folders.push({
-          id: Buffer.from(Prefix).toString('base64'),
-          name: folderName,
-          path: Prefix,
-        });
-      });
-
-      // Prepare to fetch additional details for files
-      const fileDetailsPromises = response.Contents.filter(
-        ({ Key }) => !Key.endsWith('/'),
-      ) // Ignore directories
-        .map(async ({ Key, LastModified }) => {
-          // Fetch tags for the file
-          const tagsResponse = await this.s3
-            .getObjectTagging({ Bucket: bucket, Key })
-            .promise();
-          const tags = tagsResponse.TagSet.reduce(
-            (acc, tag) => ({ ...acc, [tag.Key]: tag.Value }),
-            {},
-          );
-
-          return {
-            id: Key,
-            name: Key.split('/').pop(),
-            path: Key,
-            lastModified: LastModified,
-            tags,
-          };
-        });
-
-      // Resolve promises and add file details to the root object
-      const filesWithDetails = await Promise.all(fileDetailsPromises);
-      root.files = filesWithDetails;
-
-      return root;
-    } catch (error) {
-      this.logger.error(error);
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  /**
-   * Checks if the specified S3 object key exists in the given bucket.
-   *
-   * @param bucket - The name of the S3 bucket to check.
-   * @param key - The key of the S3 object to check.
-   * @returns A Promise that resolves to `true` if the object exists, or `false` otherwise.
-   */
-  async checkKeyExists(bucket: string, key: string): Promise<boolean> {
-    try {
-      await this.s3.getObject({ Bucket: bucket, Key: key }).promise();
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   /**
    * Gets a dsigned URL for a user upload object in S3.
    *dddd
