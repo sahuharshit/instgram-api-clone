@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { AllExceptionsFilter } from './filters/all-exception.filter';
+import { resolve } from "path";
+import { writeFileSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +33,10 @@ async function bootstrap() {
     .build(); // Build the Swagger configuration object
   // Create a Swagger document based on the application and the Swagger configuration
   const document = SwaggerModule.createDocument(app, config);
+  
+  const outputPath = resolve(__dirname, '../swagger.json');
+  writeFileSync(outputPath, JSON.stringify(document, null, 2), { encoding: 'utf8' });
+
   // Setup the Swagger module with the created document at the 'api' endpoint
   SwaggerModule.setup('api', app, document);
 
