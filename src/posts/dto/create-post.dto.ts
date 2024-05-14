@@ -1,13 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { CreateMediaDto } from 'src/media/dto/create-media.dto';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { Media } from 'src/media/entities/media.entity';
 
 export class CreatePostDto {
-  @ApiProperty({
-    example: 'Test Description',
-    description: 'Test Caption for the POST',
-  })
+  @IsNotEmpty()
+  @IsString()
   caption: string;
 
-  @ApiProperty({ type: [CreateMediaDto] })
-  media: CreateMediaDto[];
+  @IsNotEmpty()
+  media: Media[];
 }
