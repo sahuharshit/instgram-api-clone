@@ -67,4 +67,8 @@ export class UsersService {
     // Placeholder for now @TODO create a method to remove a user
     return `This action removes a #${id} user`;
   }
+
+  async findByUsername(username: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({ where: { username } });
+  }
 }
