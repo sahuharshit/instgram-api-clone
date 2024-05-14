@@ -6,18 +6,22 @@ import {
   Param,
   Put,
   Delete,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiCreatedResponse,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { PostsService } from './posts.service';
+import { Request } from 'express';
 
 @ApiTags('posts')
+@ApiBearerAuth('access-token')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -29,8 +33,11 @@ export class PostsController {
     type: PostEntity,
   })
   @ApiBody({ type: CreatePostDto })
-  async create(@Body() createPostDto: CreatePostDto): Promise<PostEntity> {
-    return this.postsService.create(createPostDto);
+  async create(
+    @Req() req: Request,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostEntity> {
+    return this.postsService.create(req, createPostDto);
   }
 
   @Get()

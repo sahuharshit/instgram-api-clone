@@ -3,16 +3,24 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from './entities/post.entity';
+import { UsersService } from 'src/users/users.service';
+import { Request } from 'express';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
+    private usersService: UsersService,
   ) {}
 
-  async create(createPostDto: CreatePostDto): Promise<Post> {
-    const newPost = this.postsRepository.create(createPostDto);
+  async create(req: Request, createPostDto: CreatePostDto): Promise<Post> {
+    const token = req.headers.authorization.split(' ')[1];
+    const decode = await this.usersService.decodeToken(token);
+    const newPost = this.postsRepository.create({
+      ...createPostDto,
+      userId: decode.userID,
+    });
     return this.postsRepository.save(newPost);
   }
 

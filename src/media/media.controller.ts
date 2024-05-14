@@ -12,12 +12,14 @@ import {
   ApiOperation,
   ApiResponse,
   ApiCreatedResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MediaService } from './media.service';
 import { Media } from './entities/media.entity';
 import { CreateMediaDto } from './dto/create-media.dto';
 
 @ApiTags('media')
+@ApiBearerAuth('access-token')
 @Controller('media')
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
