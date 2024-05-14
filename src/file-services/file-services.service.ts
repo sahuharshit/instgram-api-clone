@@ -157,7 +157,7 @@ export class FileServicesService {
    * @returns The signed URL for the object.
    */
   async getUserUploadsSignedUrl(key: string): Promise<any> {
-    const bucket = `${process.env.APP_NAME}-${process.env.ENVIRONMENT}-user-uploads`;
+    const bucket = `${process.env.APP_NAME}-${process.env.ENVIRONMENT}-demo-app`;
     const url = await this.getSignedUrl(key, bucket);
     return url;
   }
@@ -176,7 +176,7 @@ export class FileServicesService {
       const checkKeyExists = await this.checkKeyExists(bucket, key);
       if (!checkKeyExists) {
         return null;
-      }
+      }      
       const url = await this.s3.getSignedUrlPromise('getObject', {
         Bucket: bucket,
         Key: key,
@@ -184,23 +184,6 @@ export class FileServicesService {
       return url;
     } catch (e) {
       throw new BadRequestException(e.message);
-    }
-  }
-
-  async deleteUploadedFile(filePath: string): Promise<any> {
-    try {
-      const response = await this.s3
-        .deleteObject({
-          Bucket: `${process.env.APP_NAME}-${process.env.ENVIRONMENT}-user-uploads`,
-          Key: filePath,
-        })
-        .promise();
-      this.logger.log(`Bucket deleted successfully: ${filePath}`);
-
-      return response;
-    } catch (error) {
-      this.logger.error(`Error deleting bucket: ${filePath}`, error);
-      throw new BadRequestException(`Error deleting bucket: ${error.message}`);
     }
   }
 }

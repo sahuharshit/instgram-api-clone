@@ -101,8 +101,13 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { username } });
   }
 
-  async findByEmail(email: string): Promise<User | undefined> {
-    return await this.userRepository.findOne({ where: { email } });
+  async findUser(emailOrUsername: string): Promise<User | undefined> {
+    const user = await this.userRepository.findOne({ where: { email: emailOrUsername } });
+    if(user){
+      return user
+    }else{
+      return this.userRepository.findOne({where : { username: emailOrUsername}})
+    }
   }
 
   async decodeToken(token: string): Promise<any> {
@@ -117,10 +122,9 @@ export class UsersService {
     }
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
-    // Find user with given email
-    const user = await this.findByEmail(email);
-
+  async validateUser(emailOrUsername: string, password: string): Promise<User | null> {
+    // Find user with given email or username
+    const user = await this.findUser(emailOrUsername);
     if (!user) {
       throw new UnauthorizedException(
         "Invalid authentication credentials. Please double-check your information, sign up if you haven't already, and try again.",
@@ -129,7 +133,7 @@ export class UsersService {
 
     // Check if the password is valid
     const isValid = await bcrypt.compare(password, user.passwordHash);
-
+    
     // If password is invalid, throw an UnauthorizedException
     // If user is valid and password is valid, delete the password field from user object and return it
     if (user && isValid) {
@@ -151,7 +155,7 @@ export class UsersService {
    */
   async generateAuthToken(user: any): Promise<string> {
     const token = this.jwtService.sign(user, {
-      expiresIn: process.env.JWT_EXPIRATION || '60s',
+      expiresIn: process.env.JWT_EXPIRATION || '24h',
       secret: process.env.JWT_SECRET || 'secret',
     });
     return token;

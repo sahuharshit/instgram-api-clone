@@ -6,11 +6,11 @@ import { JwtAuthGuard } from 'src/users/guard/jwt-auth.guard';
 @ApiTags('File Service')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard)
-@Controller('file-services')
+@Controller('media-upload')
 export class FileServicesController {
   constructor(private readonly fileServicesService: FileServicesService) {}
 
-  @Get('/file/signed-s3-url/generate')
+  @Get('/')
   getSignedUrl(@Query('key') key?: string): Promise<string> {
     return this.fileServicesService.getUserUploadsSignedUrl(key);
   }
