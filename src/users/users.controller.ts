@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
   Get,
   Post,
   Param,
-  UnauthorizedException,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,22 +15,19 @@ import {
   ApiCreatedResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { LoginUserDto } from './dto/login-user.dto';
-import { compare } from 'bcryptjs';
+import { Public } from 'src/decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userService: UsersService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Register a new user' })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
@@ -52,6 +51,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiResponse({
     status: 200,
@@ -63,6 +63,7 @@ export class UserController {
   }
 
   @Post('login')
+  @Public()
   @ApiBody({
     type: LoginUserDto,
     examples: {
@@ -82,35 +83,7 @@ export class UserController {
       },
     },
   })
-  async login(@Body() loginUserDto: LoginUserDto) {
-    const user = await this.validateUser(
-      loginUserDto.username,
-      loginUserDto.password,
-    );
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    const access_token = await this.generateJWT(user);
-    return { access_token };
-  }
-
-  async validateUser(
-    username: string,
-    hashedPassword: string,
-  ): Promise<User | null> {
-    const user = await this.userService.findByUsername(username);
-    if (user && (await compare(hashedPassword, user.passwordHash))) {
-      return user;
-    }
-    return null;
-  }
-
-  async generateJWT(user: User): Promise<string> {
-    const payload = {
-      sub: user.id,
-      username: user.username,
-      user_email: user.email,
-    };
-    return this.jwtService.signAsync(payload);
+  async login(@Req() req: any, @Body() loginUserDto: LoginUserDto) {
+    return this.userService.login(req, loginUserDto);
   }
 }

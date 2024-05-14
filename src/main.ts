@@ -1,11 +1,20 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { ResponseInterceptor } from './interceptor/response.interceptor';
+import { AllExceptionsFilter } from './filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors();
+
+  const httpAdapter = app.get(HttpAdapterHost);
+
+  app.useGlobalInterceptors(new ResponseInterceptor());
+
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
   app.useGlobalPipes(
     new ValidationPipe({

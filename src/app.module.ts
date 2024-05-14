@@ -4,7 +4,9 @@ import { config } from 'dotenv';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { MediaModule } from './media/media.module';
-import { JWTModule, JwtAuthGuard } from './utils/auth';
+import { JWTModule } from './utils/auth';
+import { JwtAuthGuard } from './users/guard/jwt-auth.guard';
+import { FileServicesModule } from './file-services/file-services.module';
 
 config();
 
@@ -21,7 +23,14 @@ const TYPE_ORM_IMPORT = TypeOrmModule.forRoot({
 });
 
 @Module({
-  imports: [TYPE_ORM_IMPORT, UsersModule, PostsModule, MediaModule, JWTModule],
+  imports: [
+    TYPE_ORM_IMPORT,
+    UsersModule,
+    PostsModule,
+    MediaModule,
+    FileServicesModule,
+    JWTModule,
+  ],
   controllers: [],
   providers: [
     {
