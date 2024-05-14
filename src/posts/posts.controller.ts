@@ -32,7 +32,27 @@ export class PostsController {
     description: 'The post has been successfully created.',
     type: PostEntity,
   })
-  @ApiBody({ type: CreatePostDto })
+  @ApiBody({
+    type: CreatePostDto,
+    examples: {
+      example1: {
+        summary: 'Example payload',
+        value: {
+          caption: 'My new post',
+          media: [
+            {
+              url: 'https://example.com/image1.jpg',
+              mediaType: 'image',
+            },
+            {
+              url: 'https://example.com/video1.mp4',
+              mediaType: 'video',
+            },
+          ],
+        },
+      },
+    },
+  })
   async create(
     @Req() req: Request,
     @Body() createPostDto: CreatePostDto,
@@ -40,7 +60,7 @@ export class PostsController {
     return this.postsService.create(req, createPostDto);
   }
 
-  @Get()
+  @Get("/feeds")
   @ApiOperation({ summary: 'Retrieve all posts' })
   async findAll(): Promise<PostEntity[]> {
     return this.postsService.findAll();

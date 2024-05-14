@@ -23,10 +23,10 @@ export class Post {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @OneToMany(() => Media, (media) => media.post)
+  @OneToMany(() => Media, (media) => media.post, {eager: true})
   media: Media[];
 
-  @Column({ name: 'userId', nullable: true })
+  @Column({ name: 'userId' })
   userId: number;
 
   @CreateDateColumn({ type: 'timestamp' })

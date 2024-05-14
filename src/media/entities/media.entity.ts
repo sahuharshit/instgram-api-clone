@@ -21,7 +21,7 @@ export class Media {
   @Column()
   postId: number;
 
-  @ManyToOne(() => Post, (post) => post.media)
+  @ManyToOne(() => Post, (post) => post.media, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
   post: Post;
 
