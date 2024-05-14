@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { MediaModule } from './media/media.module';
-import { JWTModule } from './utils/auth';
+import { JWTModule, JwtAuthGuard } from './utils/auth';
 
 config();
 
@@ -23,7 +23,12 @@ const TYPE_ORM_IMPORT = TypeOrmModule.forRoot({
 @Module({
   imports: [TYPE_ORM_IMPORT, UsersModule, PostsModule, MediaModule, JWTModule],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements OnModuleInit {
   async onModuleInit() {
